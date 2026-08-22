@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #1e1b2e;
+
+  /* CLAUDE.md §10 Design System — color tokens */
+  --color-nebula-violet: #6d28d9;
+  --color-pulsar-pink: #ec4899;
+  --color-deep-space-ink: #1e1b2e;
+  --color-slate-fog: #52525b;
+  --color-signal-green: #10b981;
+  --color-flare-amber: #f59e0b;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-nebula-violet: var(--color-nebula-violet);
+  --color-pulsar-pink: var(--color-pulsar-pink);
+  --color-deep-space-ink: var(--color-deep-space-ink);
+  --color-slate-fog: var(--color-slate-fog);
+  --color-signal-green: var(--color-signal-green);
+  --color-flare-amber: var(--color-flare-amber);
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-data: var(--font-data);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}

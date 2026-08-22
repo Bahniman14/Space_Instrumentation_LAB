@@ -1,0 +1,28 @@
+{
+  "labs": [
+    {
+      "name": "X-Ray",
+      "experiments": [
+        { "orderIndex": 1, "name": "X-Ray Experiment 1 (placeholder - rename)" },
+        { "orderIndex": 2, "name": "X-Ray Experiment 2 (placeholder - rename)" }
+      ]
+    },
+    {
+      "name": "Radio Astronomy",
+      "experiments": [
+        { "orderIndex": 1, "name": "Radio Astronomy Experiment 1 (placeholder - rename)" },
+        { "orderIndex": 2, "name": "Radio Astronomy Experiment 2 (placeholder - rename)" },
+        { "orderIndex": 3, "name": "Radio Astronomy Experiment 3 (placeholder - rename)" },
+        { "orderIndex": 4, "name": "Radio Astronomy Experiment 4 (placeholder - rename)" }
+      ]
+    },
+    {
+      "name": "Optics",
+      "experiments": [
+        { "orderIndex": 1, "name": "Optics Experiment 1 (placeholder - rename)" },
+        { "orderIndex": 2, "name": "Optics Experiment 2 (placeholder - rename)" },
+        { "orderIndex": 3, "name": "Optics Experiment 3 (placeholder - rename)" }
+      ]
+    }
+  ]
+}

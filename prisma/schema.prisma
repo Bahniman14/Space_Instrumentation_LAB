@@ -1,0 +1,125 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  STUDENT
+  TA
+  SUPERVISOR
+}
+// Admin is NOT a Role value and NOT a User row — see CLAUDE.md §4.2
+
+model User {
+  id             String       @id @default(cuid())
+  role           Role
+  name           String
+  email          String       @unique
+  rollNumber     String?      @unique   // students only
+  assignedLabId  String?                // TAs only
+  assignedLab    Lab?         @relation(fields: [assignedLabId], references: [id])
+  submissions    Submission[]           // students only, via studentId
+  comments       Comment[]
+  marks          Mark[]
+  createdAt      DateTime     @default(now())
+}
+
+model Lab {
+  id          String       @id @default(cuid())
+  name        String       @unique   // "X-Ray" | "Radio Astronomy" | "Optics"
+  experiments Experiment[]
+  tas         User[]
+}
+
+model Experiment {
+  id             String       @id @default(cuid())
+  labId          String
+  lab            Lab          @relation(fields: [labId], references: [id])
+  name           String
+  orderIndex     Int
+  deadlineAt     DateTime?
+  deadlineSetBy  String?                // TA userId who last set it
+  submissions    Submission[]
+}
+
+model Submission {
+  id                  String        @id @default(cuid())
+  studentId           String
+  student             User          @relation(fields: [studentId], references: [id])
+  experimentId        String
+  experiment          Experiment    @relation(fields: [experimentId], references: [id])
+
+  firstFileKey        String?
+  firstFileName       String?
+  firstUploadedAt     DateTime?
+
+  latestFileKey       String?
+  latestFileName      String?
+  latestUploadedAt    DateTime?
+
+  isLate              Boolean?
+  deadlineSnapshotAt  DateTime?        // deadline value at moment of first submission
+
+  marksLocked         Boolean       @default(false)
+
+  uploadEvents        UploadEvent[]
+  comments            Comment[]
+  mark                Mark?
+
+  @@unique([studentId, experimentId])
+}
+
+model UploadEvent {
+  id            String     @id @default(cuid())
+  submissionId  String
+  submission    Submission @relation(fields: [submissionId], references: [id])
+  uploadedAt    DateTime   @default(now())
+  fileName      String
+}
+
+model Comment {
+  id            String     @id @default(cuid())
+  submissionId  String
+  submission    Submission @relation(fields: [submissionId], references: [id])
+  authorId      String
+  author        User       @relation(fields: [authorId], references: [id])
+  authorRole    Role                // TA or SUPERVISOR
+  body          String
+  createdAt     DateTime   @default(now())
+}
+
+model Mark {
+  id            String     @id @default(cuid())
+  submissionId  String     @unique
+  submission    Submission @relation(fields: [submissionId], references: [id])
+  score         Decimal    // 0–10
+  enteredById   String
+  enteredBy     User       @relation(fields: [enteredById], references: [id])
+  updatedAt     DateTime   @updatedAt
+}
+
+model OtpCode {
+  id            String     @id @default(cuid())
+  identifier    String              // email the OTP was sent to
+  codeHash      String
+  purpose       String              // "login" | "admin_login"
+  attemptCount  Int        @default(0)
+  expiresAt     DateTime
+  lockedUntil   DateTime?
+  createdAt     DateTime   @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actor      String            // "admin" (only actor for now)
+  action     String            // e.g. "unlock_submission", "edit_roster", "override_deadline"
+  target     String?           // e.g. submissionId or userId affected
+  createdAt  DateTime @default(now())
+}

@@ -1,0 +1,23 @@
+{
+  "tas": [
+    {
+      "name": "Alex Kumar",
+      "email": "alexk25@iitk.ac.in",
+      "assignedLab": "Radio Astronomy"
+    },
+    {
+      "name": "Priya Verma",
+      "email": "priyav25@iitk.ac.in",
+      "assignedLab": "X-Ray"
+    },
+    {
+      "name": "Rohan Iyer",
+      "email": "rohani24@iitk.ac.in",
+      "assignedLab": "Optics"
+    }
+  ],
+  "supervisor": {
+    "name": "Dr. Sample Supervisor",
+    "email": "samplesup@iitk.ac.in"
+  }
+}
