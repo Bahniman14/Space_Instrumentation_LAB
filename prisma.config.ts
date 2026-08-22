@@ -7,6 +7,9 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
+    // Prisma 7 config: `prisma db seed` runs this command. (Not the legacy
+    // package.json#prisma.seed field — that's the pre-7 convention.)
+    seed: "tsx prisma/seed.ts",
   },
   datasource: {
     // Migrations run DDL that the connection pooler can't handle — always use the
