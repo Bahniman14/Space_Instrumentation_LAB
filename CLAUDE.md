@@ -75,6 +75,34 @@ tier that this scale (33 users, low traffic) will never exceed.
 | Password hashing (Admin only) | bcrypt |
 | OTP hashing | bcrypt or equivalent — same treatment as a password |
 
+**Prisma 7 specifics (confirmed during Phase 0 — treat as settled, not to be
+"corrected" back to older defaults in a later session):**
+- Config lives in `prisma.config.ts`, alongside `schema.prisma` — this is normal for
+  this Prisma version, not a deviation.
+- The generated client does **not** live at the classic `@prisma/client` import path.
+  It's generated into `src/generated/prisma`. **Every file that imports `PrismaClient`
+  (the `lib/db.ts` singleton, and anywhere else touching the DB) must import from that
+  generated path, consistently, for the rest of the project.** If a future session
+  defaults back to `import { PrismaClient } from '@prisma/client'` out of habit, that's
+  a bug — check `lib/db.ts` for the actual working import and match it.
+- Neon gives two connection strings: **pooled** (hostname contains `-pooler`) and
+  **direct/unpooled** (no `-pooler`). They are not interchangeable:
+  - `DATABASE_URL` = the **pooled** string — used by the app's Prisma Client at
+    runtime, via the Neon serverless driver adapter (`@prisma/adapter-neon` /
+    `PrismaNeon`). Required for Vercel's serverless functions to avoid exhausting
+    Postgres's connection limit.
+  - `DATABASE_URL_UNPOOLED` = the **direct** string — required for `prisma migrate`
+    and `prisma db push`. Migrations run DDL that the pooler can't handle; running
+    them against the pooled URL fails with a cryptic "prepared statement already
+    exists" error, not an obvious one. `prisma.config.ts`'s `datasource.url` should
+    point at `DATABASE_URL_UNPOOLED`, not `DATABASE_URL`.
+  - Both variables are required in `.env` locally and in Vercel's production env vars
+    — not just one.
+- Prisma's `init` also scaffolds AI-agent skill folders (`.claude/skills`,
+  `.windsurf/skills`, etc.) by default — these were deliberately deleted in Phase 0 as
+  unrequested clutter. Don't let a future `prisma init`-adjacent command silently
+  reintroduce them.
+
 ## 4. Auth Flows
 
 ### 4.1 Student / TA / Supervisor (OTP only, no password)
@@ -243,6 +271,7 @@ model AuditLog {
 
 ```
 DATABASE_URL=
+DATABASE_URL_UNPOOLED=
 JWT_SECRET=
 ADMIN_EMAIL=
 ADMIN_PASSWORD_HASH=
@@ -322,13 +351,15 @@ not a marketing surface.
   anything data-shaped, across both the landing page and every dashboard
 
 **Application by surface:**
-- **Landing page (`/`):** full expression of the tokens above — gradient, the
-  signature motif set (below), generous whitespace. This is the one place the brand
-  gets to be bold.
-- **Student / Staff / Admin dashboards (Phases 3–6):** same tokens, restrained —
-  data-dense and functional. Gradient reserved for primary buttons and nav accents
-  only, never spread across cards or backgrounds. Tables and data fields use IBM
-  Plex Mono.
+- **Landing page (`/`): dark.** Deep Space Ink background, Nebula Violet → Pulsar
+  Pink gradient glow, full expression of the tokens above — this is the one place
+  the brand gets to be bold. Confirmed as-built in Phase 0; don't lighten it later.
+- **Student / Staff / Admin dashboards (Phases 3–6): light/neutral background,**
+  same tokens applied restrained — data-dense and functional. This is a deliberate
+  split, not an oversight: TAs and the Supervisor review many reports in one sitting,
+  and a light background reads faster over a long grading session than carrying the
+  dark theme through. Gradient reserved for primary buttons and nav accents only,
+  never spread across cards or backgrounds. Tables and data fields use IBM Plex Mono.
 
 **Signature element:** three interlocking lab motifs — X-ray burst, radio-telescope
 concentric arcs, prism spectrum split — as a small cohesive icon set. Not decoration:
@@ -340,13 +371,3 @@ whole product — don't introduce competing decorative elements alongside it.
 AI-design default worth avoiding on instinct. Here it's a deliberate choice made
 against a real reference the user provided, not an autopilot pick — proceed with it
 as specified, don't soften it toward a "safer" muted palette.
-
-<!-- BEGIN:nextjs-agent-rules -->
-
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->

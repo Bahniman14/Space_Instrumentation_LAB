@@ -9,6 +9,8 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    // Migrations run DDL that the connection pooler can't handle — always use the
+    // direct/unpooled URL here, never DATABASE_URL. See CLAUDE.md §3.
+    url: process.env["DATABASE_URL_UNPOOLED"],
   },
 });
